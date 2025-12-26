@@ -1,13 +1,13 @@
 #!/bin/bash
 
 #SBATCH --account=o250027
-#SBATCH --job-name=fq2bam_normal_WES
+#SBATCH --job-name=fq2bam_WES
 #SBATCH --partition=gpu
 #SBATCH --time=8:00:00
 #SBATCH --cpus-per-task=20
 #SBATCH --mem=240G
-#SBATCH --output=logs/fq2bam_normal_WES_%j.out
-#SBATCH --error=logs/fq2bam_normal_WES_%j.err
+#SBATCH --output=logs/fq2bam_WES_%j.out
+#SBATCH --error=logs/fq2bam_WES_%j.err
 #SBATCH --gpus=1
 
 
