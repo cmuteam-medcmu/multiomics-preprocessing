@@ -10,7 +10,6 @@
 #SBATCH --error=logs/fq2bam_normal_WES_%j.err
 #SBATCH --gpus=1
 
-PATIENT=$1
 
 # Load required modules
 ml purge
@@ -18,6 +17,7 @@ ml apptainer
 ml samtools
 
 # ===== User-defined Variables =====
+PATIENT=$1
 # The PATIENT variable must be set before running this script.
 # Example: export PATIENT="patient_sample_name"
 if [ -z "$PATIENT" ]; then
@@ -25,14 +25,14 @@ if [ -z "$PATIENT" ]; then
     exit 1
 fi
 
+SAMPLE_TYPE=your_sample_type     #Tumor/Normal
+
 # ===== Input / Output Directories =====
 PROJECT_DIR=/path_to_project_DIR
 KNOWN_SITES_DIR=/path_to_KNOWN_SITES_DIR        #/common/db/human_ref/hg38/v0
 REF_DIR=/path_to_reference_DIR                  #/common/db/human_ref/hg38/parabricks
 FASTQ_DIR=${PROJECT_DIR}/path_to_fp.fastq_DIR
 OUT_DIR=${PROJECT_DIR}/path_to_BAM_storage_DIR_or_output_DIR
-
-mkdir -p ${OUT_DIR} logs ${OUT_DIR}/tmp
 
 # ===== Input Files =====
 # IMPORTANT: Verify these filenames are correct for your normal WES sample
@@ -48,6 +48,8 @@ OUTPUT_RECAL_BAM=${OUT_DIR}/${PATIENT}_WES.recal.bam
 OUTPUT_RECAL_TXT=${OUT_DIR}/${PATIENT}_WES.recal.txt
 OUTPUT_QC_DIR=${OUT_DIR}/${PATIENT}_WES-qc-metrics
 
+mkdir -p ${OUT_DIR} logs ${OUT_DIR}/tmp
+
 # ===== Run fq2bam Pipeline =====
 apptainer exec --nv \
   -B ${PROJECT_DIR} \
@@ -61,8 +63,8 @@ apptainer exec --nv \
   --out-bam ${OUTPUT_BAM} \
   --out-recal-file ${OUTPUT_RECAL_TXT} \
   --tmp-dir ${OUT_DIR}/tmp \
-  --read-group-sm "${PATIENT}_Normal" \
-  --read-group-id "${PATIENT}_Normal" \
+  --read-group-sm "${PATIENT}_${SAMPLE_TYPE}" \
+  --read-group-id "${PATIENT}_${SAMPLE_TYPE}" \
   --read-group-lb "lib1" \
   --read-group-pl "ILLUMINA" \
 
