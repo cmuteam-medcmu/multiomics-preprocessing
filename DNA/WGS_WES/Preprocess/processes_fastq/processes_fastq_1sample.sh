@@ -45,4 +45,5 @@ fastp -i ${INPUT_FILE_1} -I ${INPUT_FILE_2} \
 fastqc -o ${OUT_DIR_fastqc2} ${OUTPUT_FILE_1}
 fastqc -o ${OUT_DIR_fastqc2} ${OUTPUT_FILE_2}
 
-echo "QC finised, fastq files ready to use"
+echo "QC finised, fastq files in ${OUT_DIR_fastp} are ready"
+
