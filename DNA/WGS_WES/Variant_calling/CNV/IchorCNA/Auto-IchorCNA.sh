@@ -35,6 +35,7 @@ fi
 
 for i in `cat /project/o250003_CFBile/WGS_seq/sample_all.txt`
 do
+    mkdir ${i}
     readCounter --window 1000000 \
         --quality 20 \
         --chromosome ${chrom} \
