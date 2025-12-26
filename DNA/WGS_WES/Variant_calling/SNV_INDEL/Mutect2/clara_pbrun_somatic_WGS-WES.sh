@@ -42,7 +42,7 @@ mkdir -p ${BAM_DIR} ${OUT_DIR} ${OUT_VCF_DIR} ${OUT_RECAL_DIR} ${TMP_DIR} logs
 REF=${REF_DIR}/Homo_sapiens_assembly38.fasta
 KNOWN_SITES_SNP=${KNOWN_SITES_DIR}/1000G_phase1.snps.high_confidence.hg38.vcf.gz
 KNOWN_SITES_INDEL=${KNOWN_SITES_DIR}/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz
-BED=${PROJECT_DIR}/Exon_BED_file.bed  #your exon captured bed file
+BED=/path_to_Exon_BED_file.bed                #paht your exon captured bed file
 
 # ===== Input FastQ Files =====
 #Tumor fastq (WES)
@@ -59,15 +59,15 @@ RG_TUMOR="@RG\tID:${TUMOR_NAME}\tSM:${TUMOR_NAME}\tPL:ILLUMINA\tLB:lib1\tPU:${TU
 RG_NORMAL="@RG\tID:${NORMAL_NAME}\tSM:${NORMAL_NAME}\tPL:ILLUMINA\tLB:lib1\tPU:${NORMAL_NAME}.L1"
 
 # ===== Output Files =====
-BAM_TUMOR=${BAM_DIR}/${PATIENT}_WES.recal.bam
-BAM_NORMAL=${BAM_DIR}/${PATIENT}_WGS.recal.exome.bam
+BAM_TUMOR=${BAM_DIR}/${PATIENT}_tumor_WES.recal.bam
+BAM_NORMAL=${BAM_DIR}/${PATIENT}_normal_WGS.recal.exome.bam
 UNFILTERED_VCF=${OUT_VCF_DIR}/${PATIENT}.unfiltered.vcf.gz
-TUMOR_RECAL_TXT=${OUT_RECAL_DIR}/${PATIENT}.tumor.recal.txt
-NORMAL_RECAL_TXT=${OUT_RECAL_DIR}/${PATIENT}.WGS.normal.recal.txt
+TUMOR_RECAL_TXT=${OUT_RECAL_DIR}/${PATIENT}_tumor_WES.recal.txt
+NORMAL_RECAL_TXT=${OUT_RECAL_DIR}/${PATIENT}_normal_WGS.recal.txt
 
 
 # ===== Run Parabricks Somatic Pipeline =====
-echo ">>> Starting Parabricks Somatic pipeline for patient ${PATIENT}"
+echo ">>> Starting Parabricks Somatic pipeline for patient ${PATIENT} (WGS vs WES)"
 
 apptainer exec --nv \
   -B ${PROJECT_DIR} \
