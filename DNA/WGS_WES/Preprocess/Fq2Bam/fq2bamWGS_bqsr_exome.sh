@@ -1,6 +1,6 @@
 #!/bin/bash
 
-#SBATCH --account=o250027
+#SBATCH --account=o250027  #your project
 #SBATCH --job-name=fq2bam_normal_WGS
 #SBATCH --partition=gpu
 #SBATCH --time=8:00:00
