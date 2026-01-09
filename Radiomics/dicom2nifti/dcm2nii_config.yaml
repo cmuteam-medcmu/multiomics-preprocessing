@@ -1,0 +1,105 @@
+# ===============================
+# dicom2nifti config
+# ===============================
+
+# -------------------------------
+# Pipeline parameters
+# -------------------------------
+
+# nbia = /project/o250004_STSML01/Radiomics/MRI/STS_nbia/NBIA_Samples_raw/manifest-MjbMt99Q1553106146386120388/Soft-tissue-Sarcoma/
+# cmu = /project/o250004_STSML01/Radiomics/MRI/OS_cmu/Processed_dicom
+
+params:
+  ROOT: "/project/o250004_STSML01/Radiomics/MRI/OS_cmu/Processed_dicom"
+  OUTDIR: "/project/o250004_STSML01/Radiomics/dcm2niix/output"
+
+  CASE_PATTERNS: ["STS*", "OS*", "HN*"]    # case folder patterns
+  MODALITY: ""                             # MR | -PET|CT | "" (no modality filter)
+
+  IMAGE_KEY: "image"                       # keyword for image folder
+  MASK_KEY: "mask"                         # keyword for mask folder
+  FIND_DEPTH: 3                            # search depth for image/mask folders
+
+# -------------------------------
+# dcm2niix settings
+# -------------------------------
+dcm2niix:
+  # --- compression ---
+  gz: "y"                                 # -z : gzip output (.nii.gz)
+  compression_level: 6                    # gzip level (may not be supported by all builds)
+
+  # --- BIDS ---
+  bids_image: "y"                         # image series -> BIDS JSON
+  bids_mask: "n"                          # mask series  -> no BIDS JSON
+  anonymize_bids: "n"                     # anonymize BIDS JSON
+
+  # --- aux / defaults ---
+  comment: ""                             # -c : comment in aux file
+  generate: "n"                           # -g : generate defaults file
+
+  # --- dicom search ---
+  depth: 3                                # -d : DICOM search depth
+  quick_search: "y"                       # -q : quick search mode
+
+  # --- filtering ---
+  ignore_derived: "n"                     # -i : ignore derived/localizer
+  only_series_crc: []                     # -n : restrict to series CRC
+  single: "n"                             # -s : single series mode
+
+  # --- output naming ---
+  filename: "%f_%p_%t_%s"                 # -f : output filename pattern
+  write: 2                                # -w : on name conflict (0/1/2)
+
+  # --- geometry ---
+  merge: 2                                # -m : slice merge mode
+  crop: "n"                               # -x : crop/rotate
+
+  # --- intensity ---
+  lossless_scale: "o"                     # -l : intensity scaling
+  philips: "y"                            # -p : Philips scaling
+
+  # --- special modes ---
+  adjacent: "n"                           # -a : adjacent DICOMs
+  rename: "n"                             # -r : rename DICOM only
+  export: "n"                             # -e : export non-NIfTI formats
+
+  # --- logging ---
+  verbose: 1                              # -v : verbosity level
+  progress: "n"                           # --progress
+  terse: false                            # --terse
+  xml: false                              # --xml
+  ignore_trigger_times: false             # --ignore_trigger_times
+  big_endian: "o"                         # --big-endian
+
+  # --- meta ---
+  show_help: false                        # -h : show help only
+  show_version: false                     # --version
+
+# -------------------------------
+# dcmrtstruct2nii settings
+# -------------------------------
+dcmrtstruct2nii:
+  command: "convert"                      # subcommand
+
+  # --- inputs (set at runtime) ---
+  input_rtstruct: ""                      # RTSTRUCT DICOM
+  dicom_reference: ""                     # referenced image series
+
+  # --- output ---
+  output_dir: ""                          # output directory
+  output_format: "nii.gz"                 # mask format
+
+  # --- ROI selection ---
+  include_rois: []                        # include only these ROIs
+  exclude_rois: []                        # exclude these ROIs
+
+  merge_rois: false                       # merge ROIs into one mask
+  merged_label_value: 1                   # label value if merged
+
+  # --- geometry / safety ---
+  strict_geometry: true                   # fail on geometry mismatch
+  fill_holes: true                        # fill contour holes
+  allow_empty_masks: false                # fail if mask is empty
+
+  # --- logging ---
+  verbose: 1                              # verbosity

@@ -1,0 +1,11 @@
+name: dicom2nifti
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - python>=3.9
+  - dcm2niix
+  - yq
+  - pip
+  - pip:
+      - dcmrtstruct2nii
