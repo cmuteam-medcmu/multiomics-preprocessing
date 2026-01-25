@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 
 # ==============================================================================
-# Script Name:  run_qc_pipeline.sh
-# Description:  Runs FastQC and fastp on paired-end genomic data.
+# Script Name :  run_qc_pipeline.sh
+# Description :  Runs FastQC and fastp on paired-end genomic data.
+# Author      :  Songphon Sutthitthasakul
+# Updated Date:  25-01-2026
 # ==============================================================================
 
 set -euo pipefail
