@@ -12,6 +12,7 @@ set -euo pipefail
 # 1. VARIABLE SETTING
 # Use readonly for variables that should not change
 readonly THREADS=8
+readonly MEMORY=20
 readonly IN_DIR="./data/raw"
 readonly OUT_DIR="./data/processed"
 readonly REPORT_DIR="./reports"
