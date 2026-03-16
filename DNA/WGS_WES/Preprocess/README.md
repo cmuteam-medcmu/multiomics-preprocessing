@@ -14,14 +14,14 @@
   |----|----|----|
   |date|YYYYMMDD|20260101|
   |library|3 ABBR. with/without coverage|WGS20X|
-  |platform|3 ABBR.|ILU (Illumina)|
+  |platform|3 ABBR.|ILL (Illumina)|
   |case id|5 digits number|OS00001|
   |sample type|3 ABBR.|CFD (cfDNA)|
   |sample event|based on each disease|Fx12M (follow-up 12 months)|
 
 ```csv
 ID,R1,R2
-20260101_WGS20X_ILU_OS00001_CFD_Fx12M,/path/to/Illumina_R1.fq.gz,/path/to/Illumina_R2.fq.gz
+20260101_WGS20X_ILL_OS00001_CFD_Fx12M,/path/to/Illumina_R1.fq.gz,/path/to/Illumina_R2.fq.gz
 ```
 
 2. run_preprocess_pipeline.csv
