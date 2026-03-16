@@ -68,9 +68,9 @@ readonly REPORT_DIR="${OUT_DIR}/reports"
 ├── 02_PREPROCESS/
 ├── multiqc_data/
 ├── reports/
-├── QC_SUMMARY.csv
+├── QC_SUMMARY.xlsx
 ```
    
 5. QC template
-    - Copy data from QC_SUMMARY.csv
+    - Copy data from QC_SUMMARY.xlsx
     - Paste to Google sheet template [QC Summary](https://docs.google.com/spreadsheets/d/1JUirnX6yo0NkUpjTHGlRnbIpUlB-UyOtZFrjM2WKcJs/edit?usp=sharing).
