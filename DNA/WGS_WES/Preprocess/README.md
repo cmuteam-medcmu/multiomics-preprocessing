@@ -9,8 +9,17 @@
 ## Setting
 1.  sample_sheet.csv
   -  ID must follow AWS structure in each project
-  -  {date in yyyymmdd}_{platform with coverage}_{case id with 5 digits}_{sample type}_{sample event}
+
+  |element|format|example|
+  |----|----|----|
+  |date|YYYYMMDD|20260101|
+  |library|3 ABBR. with/without coverage|WGS20X|
+  |platform|3 ABBR.|ILU|
+  |case id|5 digits number|OS00001|
+  |sample type|3 ABBR.|CFD|
+  |sample event|based on each disease|Fx12M|
+
 ```csv
 ID,R1,R2
-20260101_WGS20X_OS00007_CF_Fx12M,/path/to/Illumina_R1.fq.gz,/path/to/Illumina_R2.fq.gz
+20260101_WGS20X_ILU_OS00001_CFD_Fx12M,/path/to/Illumina_R1.fq.gz,/path/to/Illumina_R2.fq.gz
 ```
