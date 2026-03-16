@@ -182,7 +182,7 @@ run_multiqc() {
   echo "LOG: Running MultiQC..."
   multiqc ${OUT_DIR} -o ${OUT_DIR}
 
-  python ${OUT_DIR}/multiqc_data/multiqc_data.json ${OUT_DIR}/QC_SUMMARY.csv
+  python ${OUT_DIR}/multiqc_data/multiqc_data.json ${OUT_DIR}/QC_SUMMARY.xlsx
 }
 
 
