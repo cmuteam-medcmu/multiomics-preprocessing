@@ -9,6 +9,7 @@
 ## Setting
 1. sample_sheet.csv
     -  ID must follow AWS structure in each project
+    -  [Standard ABBR.](https://docs.google.com/spreadsheets/d/1sp33RKGkny33fUeUc--WUEOlk2BAREb9xsbEyUN9qng/edit?usp=sharing)
 
   |element|format|example|
   |----|----|----|
@@ -24,7 +25,7 @@ ID,R1,R2
 20260101_WGS20X_ILL_OS00001_CFD_Fx12M,/path/to/Illumina_R1.fq.gz,/path/to/Illumina_R2.fq.gz
 ```
 
-2. run_preprocess_pipeline.csv
+2. run_preprocess_pipeline.sh
     -  Change header for slurm management
     -  Set variables and the paths of sample_sheet.csv & qc_script.py
   
