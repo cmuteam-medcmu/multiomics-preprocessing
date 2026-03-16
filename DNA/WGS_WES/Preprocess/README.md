@@ -3,7 +3,7 @@
 -  Fastp
 -  Fastqc
 -  Fq2Bam
--  MosMepth
+-  MosDepth
 -  MultiQC
 
 ## Setting
@@ -14,10 +14,10 @@
   |----|----|----|
   |date|YYYYMMDD|20260101|
   |library|3 ABBR. with/without coverage|WGS20X|
-  |platform|3 ABBR.|ILU|
+  |platform|3 ABBR.|ILU (Illumina)|
   |case id|5 digits number|OS00001|
-  |sample type|3 ABBR.|CFD|
-  |sample event|based on each disease|Fx12M|
+  |sample type|3 ABBR.|CFD (cfDNA)|
+  |sample event|based on each disease|Fx12M (follow-up 12 months)|
 
 ```csv
 ID,R1,R2
