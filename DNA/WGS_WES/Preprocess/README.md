@@ -8,7 +8,7 @@
 
 ## Setting
 1.  sample_sheet.csv
-  -  ID must follow AWS structure in each project
+    -  ID must follow AWS structure in each project
 
   |element|format|example|
   |----|----|----|
