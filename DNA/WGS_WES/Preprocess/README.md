@@ -10,7 +10,7 @@
 1. Create folder structure for each sequencing batch
 ```
 20260101_Batch1/ (OUT_DIR)
-└── 00_RAW_FASTQ
+└── 00_RAW_FASTQ/
     ├── Illumina_R1.fq.gz
     └── Illumina_R2.fq.gz
 ```
@@ -61,13 +61,13 @@ readonly REPORT_DIR="${OUT_DIR}/reports"
 4. Final output 
 ```
 20260101_Batch1/ (OUT_DIR)
-├── 00_RAW_FASTQ
+├── 00_RAW_FASTQ/
 │   ├── Illumina_R1.fq.gz
 │   └── Illumina_R2.fq.gz
-├── 01_CLEAN_QC
-├── 02_PREPROCESS
-├── multiqc_data
-├── reports
+├── 01_CLEAN_QC/
+├── 02_PREPROCESS/
+├── multiqc_data/
+├── reports/
 ├── QC_SUMMARY.csv
 ```
    
