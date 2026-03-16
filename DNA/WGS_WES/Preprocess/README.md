@@ -26,6 +26,7 @@ ID,R1,R2
 
 2. run_preprocess_pipeline.csv
     -  Change header for slurm management
+    -  Set variables and the paths of sample_sheet.csv & qc_script.py
   
 ```bash
 #SBATCH --account=o250022               
@@ -39,7 +40,6 @@ ID,R1,R2
 #SBATCH --error=preprocess_%j.err
 ```
 
-    - Set variables and the paths of sample_sheet.csv & qc_script.py
 ```bash
 readonly THREADS=40
 readonly MEMORY=200 # Gb unit
