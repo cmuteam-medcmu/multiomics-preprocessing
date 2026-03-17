@@ -126,11 +126,11 @@ run_fq2bam() {
   # Convert BAM to CRAM
   samtools view -@ "${THREADS}" -C -T ${FASTA_FILE} \
     -o ${output_dir}/${sample_id}_dedup_sorted.cram ${output_dir}/${sample_id}_dedup_sorted.bam
-  samtools view -@ "${THREADS}" -C -T ${FASTA_FILE} \
-    -o ${output_dir}/${sample_id}_recal.cram ${output_dir}/${sample_id}_recal.bam
+  #samtools view -@ "${THREADS}" -C -T ${FASTA_FILE} \
+  #  -o ${output_dir}/${sample_id}_recal.cram ${output_dir}/${sample_id}_recal.bam
 
   samtools index -@ "${THREADS}" -b ${output_dir}/${sample_id}_dedup_sorted.cram
-  samtools index -@ "${THREADS}" -b ${output_dir}/${sample_id}_recal.cram
+  #samtools index -@ "${THREADS}" -b ${output_dir}/${sample_id}_recal.cram
 
   rm ${output_dir}/${sample_id}_dedup_sorted.bam* #${output_dir}/${sample_id}_recal.bam*
 }
