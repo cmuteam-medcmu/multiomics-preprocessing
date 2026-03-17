@@ -132,7 +132,7 @@ run_fq2bam() {
   samtools index -@ "${THREADS}" -b ${output_dir}/${sample_id}_dedup_sorted.cram
   samtools index -@ "${THREADS}" -b ${output_dir}/${sample_id}_recal.cram
 
-  rm ${output_dir}/${sample_id}_dedup_sorted.bam* ${output_dir}/${sample_id}_recal.bam*
+  rm ${output_dir}/${sample_id}_dedup_sorted.bam* #${output_dir}/${sample_id}_recal.bam*
 }
 
 # --- Function: Run MosDepth ---
