@@ -182,7 +182,7 @@ run_multiqc() {
   echo "LOG: Running MultiQC..."
   multiqc ${OUT_DIR} -o ${OUT_DIR}
 
-  python ${OUT_DIR}/multiqc_data/multiqc_data.json ${OUT_DIR}/QC_SUMMARY.xlsx
+  python ${QC_SCRIPT} ${OUT_DIR}/multiqc_data/multiqc_data.json ${OUT_DIR}/QC_SUMMARY.xlsx
 }
 
 
@@ -193,7 +193,7 @@ main() {
   PREPROCESS_DIR="${OUT_DIR}/02_PREPROCESS"
 
   # Ensure directories exist
-  mkdir -p "${OUT_DIR}" "${REPORT_DIR}" "${REPORT_DIR}" "${PREPROCESS_DIR}"
+  mkdir -p "${OUT_DIR}" "${REPORT_DIR}" "${CLEAN_DIR}" "${PREPROCESS_DIR}"
 
   # Loop through read sample_sheet.csv file
   {
