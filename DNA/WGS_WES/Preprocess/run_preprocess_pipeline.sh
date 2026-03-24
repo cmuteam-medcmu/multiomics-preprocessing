@@ -6,7 +6,7 @@
 #SBATCH --time=10:00:00
 #SBATCH --cpus-per-task=40
 #SBATCH --gpus=1
-#SBATCH --mem=200G
+#SBATCH --mem=150G
 #SBATCH --output=preprocess_%j.out          
 #SBATCH --error=preprocess_%j.err
 
@@ -22,9 +22,9 @@ set -euo pipefail
 # 1. VARIABLE SETTING
 readonly THREADS=40
 readonly MEMORY=200 # Gb unit
-readonly OUT_DIR="/project/o250022_cfOSTEO/script/preprocess"
-readonly SAMPLES_SHEET="./sample_sheet.csv"
-readonly QC_SCRIPT="./qc_script.py"
+readonly OUT_DIR="/project/o250022_cfOSTEO/Cell-line/20260320_Tissue_WES"
+readonly SAMPLES_SHEET="/project/o250022_cfOSTEO/Cell-line/20260320_Tissue_WES/00_RAW_FASTQ/sample_sheet.csv"
+readonly QC_SCRIPT="/project/o250022_cfOSTEO/Cell-line/script/qc_script.py"
 readonly REPORT_DIR="${OUT_DIR}/reports"
 
 # 2. FUNCTIONS
@@ -97,6 +97,7 @@ run_fq2bam() {
       --knownSites /Ref_hg38_v0/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz \
       --knownSites /Ref_hg38_v0/Homo_sapiens_assembly38.known_indels.vcf.gz \
       --knownSites /Ref_hg38_v0/Homo_sapiens_assembly38.dbsnp138.vcf.gz \
+      --interval /Ref_hg38_v0/${INTERVAL} \
       --read-group-sm ${sample_id} \
       --read-group-lb ${sample_id} \
       --read-group-pl Illumina \
@@ -117,6 +118,7 @@ run_fq2bam() {
       --ref /Ref_hg38/Homo_sapiens_assembly38.fasta \
       --in-bam /InputDir/${sample_id}_dedup_sorted.bam \
       --in-recal-file /InputDir/${sample_id}-recal.txt  \
+      --interval /Ref_hg38_v0/${INTERVAL} \
       --out-bam /OutputDir/${sample_id}_recal.bam \
       --tmp-dir /OutputDir
 
@@ -151,27 +153,23 @@ run_mosdepth() {
   then
     # MosDepth For WGS
     apptainer run --nv \
-      -B /common/db/human_ref/hg38/parabricks:/Ref_hg38 \
       -B ${output_dir}:/InputDir \
       -B ${output_dir}:/OutputDir \
-      /home/songphon.sut/SIF/Mosdepth_0.3.10--h4e814b3_1.sif \
+      /common/sif/mosdepth/Mosdepth_0.3.10--h4e814b3_1.sif \
       mosdepth -n --fast-mode -t "${THREADS}" \
       --by 1000 \
-      -f /Ref_hg38/Homo_sapiens_assembly38.fasta \
-      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.cram
+      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.bam
   elif [[ $SEQ_PLATFORM == "WES" ]]
   then
     # MosDepth For WES or Target
     apptainer run --nv \
-      -B /common/db/human_ref/hg38/parabricks:/Ref_hg38 \
       -B ${output_dir}:/InputDir \
       -B ${output_dir}:/OutputDir \
-      -B /project/o250003_CFBile/Target_Seq/02_Macrogen_Prep/src:/Onco_pan \
-      /home/songphon.sut/SIF/Mosdepth_0.3.10--h4e814b3_1.sif \
+      -B /project/o260003_CRU_BI/human_ref:/Ref \
+      /common/sif/mosdepth/Mosdepth_0.3.10--h4e814b3_1.sif \
       mosdepth -n --fast-mode -t "${THREADS}" \
-      --by /Onco_pan/onco_680_DNA_hg38.sorted_merged.bed \
-      -f /Ref_hg38/Homo_sapiens_assembly38.fasta \
-      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.cram
+      --by /Ref/exome_calling_regions.v1.interval_list.bed.gz \
+      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.bam
   fi
 }
 
@@ -209,9 +207,11 @@ main() {
       if [[ "$base_name" =~ "WGS" ]]
       then
         SEQ_PLATFORM="WGS"
+        INTERVAL="wgs_calling_regions.hg38.interval_list"
       elif [[ "$base_name" =~ "WES" ]]
       then
         SEQ_PLATFORM="WES"
+        INTERVAL="exome_calling_regions.v1.interval_list"
       else
         echo "Wrong platform type for sample ${base_name}!!"
         exit
@@ -221,8 +221,15 @@ main() {
       local r2_file="${IN_DIR}/${base_name}_R2.fastq.gz"
 
       # 0. Rename R1 & R2
-      mv "$col2" "$r1_file"
-      mv "$col3" "$r2_file"
+      if [[ ! -f "$r1_file" ]]
+      then
+        mv "$col2" "$r1_file"
+      fi
+      
+      if [[ ! -f "$r2_file" ]]
+      then
+        mv "$col3" "$r2_file"
+      fi
 
       # 1. Initial QC
       run_fastqc "${r1_file}" "${r2_file}" "${REPORT_DIR}/fastqc_raw"
