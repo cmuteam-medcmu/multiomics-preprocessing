@@ -168,7 +168,7 @@ run_mosdepth() {
       -B /project/o260003_CRU_BI/human_ref:/Ref \
       /common/sif/mosdepth/Mosdepth_0.3.10--h4e814b3_1.sif \
       mosdepth -n --fast-mode -t "${THREADS}" \
-      --by /Ref/exome_calling_regions.v1.interval_list.bed.gz \
+      --by /Ref/exome_calling_regions.v1.interval_list.bed \
       /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.bam
   fi
 }
