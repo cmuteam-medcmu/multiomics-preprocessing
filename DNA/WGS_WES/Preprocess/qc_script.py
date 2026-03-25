@@ -9,108 +9,110 @@ def extract_qc_with_trim(json_path, excel_output):
         mqc_data = json.load(f)
 
     gen_stats = mqc_data.get('report_general_stats_data', [])
-    raw_data = mqc_data.get('report_saved_raw_data', {})
-    sources = mqc_data.get('report_data_sources', {})
-
-    # 2. Build Name Map (To unify Fastp, Picard, Mosdepth, and Samtools)
-    name_map = {}
-    for tool, categories in sources.items():
-        for cat, samples in categories.items():
-            for internal_name, path in samples.items():
-                # Extract base Sample ID (e.g., 20261125_WGS20X_OS00007_CF_Fx12M)
-                match = re.search(r'(\d{8}.*?_Fx\w+M)', path)
-                if match:
-                    name_map[internal_name] = match.group(1)
-
+    
     merged = {}
+    generic_metrics = {}
+    
+    # 2. Improved ID Extractor
     def get_id(s):
-        return name_map.get(s, s)
+        match = re.search(r'(\d{8}.*?_Fx\w+M)', s)
+        return match.group(1) if match else s
 
     # 3. Combine General Stats
     for entry in gen_stats:
         for s, metrics in entry.items():
             sid = get_id(s)
-            if sid not in merged: merged[sid] = {}
-            merged[sid].update(metrics)
+            
+            # Catch generic keys like "insert_size" or "quality_yield"
+            if sid == s and not re.search(r'Fx\w+M', s):
+                generic_metrics.update(metrics)
+            else:
+                if sid not in merged: 
+                    merged[sid] = {}
+                merged[sid].update(metrics)
+                
+    # Merge generic metrics into our valid samples
+    for sid in merged:
+        merged[sid].update(generic_metrics)
 
-    # 4. Extract Fastp Data (Before/After Trim)
-    fastp = raw_data.get('multiqc_fastp', {})
-    for s, metrics in fastp.items():
-        sid = get_id(s)
-        if sid not in merged: merged[sid] = {}
-        merged[sid]['fastp_before'] = metrics.get('summary', {}).get('before_filtering', {})
-        merged[sid]['fastp_after'] = metrics.get('summary', {}).get('after_filtering', {})
-        merged[sid]['fastp_adapter'] = metrics.get('adapter_cutting', {}).get('adapter_trimmed_reads', 0)
-
-    # 5. Extract Picard Quality Distribution (Average Phred)
-    q_dist = raw_data.get('multiqc_picard_quality_score_distribution', {})
-    for s, hist in q_dist.items():
-        sid = get_id(s)
-        if sid not in merged: merged[sid] = {}
-        try:
-            merged[sid]['phred'] = sum(float(v['QUALITY']) * float(v['COUNT_OF_Q']) for v in hist.values()) / sum(float(v['COUNT_OF_Q']) for v in hist.values())
-        except:
-            merged[sid]['phred'] = 0.0
-
-    # 6. Build DataFrame
-    df = pd.DataFrame()
+    # 4. Build DataFrame
+    df_list = []
     for sid, dat in merged.items():
-        # Only process samples that have Fastp data
-        if 'fastp_before' not in dat: continue 
+        if not re.search(r'Fx\w+M', sid): 
+            continue 
         
-        b = dat.get('fastp_before', {})
-        a = dat.get('fastp_after', {})
-        adp = dat.get('fastp_adapter', 0)
+        b_total = dat.get('before_filtering_total_reads', 0)
+        a_total = dat.get('after_filtering_total_reads', 0)
+        adp = dat.get('adapter_cutting_adapter_trimmed_reads', 0)
+        
+        # Calculate Q30 once to use for both columns
+        after_q30 = dat.get('after_filtering_q30_rate', 0) * 100
         
         row = {
             'Sample': sid,
             
             # BEFORE TRIM
-            'Before_Total_Read(M)': b.get('total_reads', 0) / 1e6,
-            'Before_%GC': b.get('gc_content', 0) * 100,
-            'Before_Base_Quality(Q30)': b.get('q30_rate', 0) * 100,
-            'Before_Length': b.get('read1_mean_length', 0),
+            'Before_Total_Read(M)': b_total / 1e6 if b_total else 0,
+            'Before_%GC': dat.get('after_filtering_gc_content', 0) * 100,
+            'Before_Base_Quality(Q30)': dat.get('after_filtering_q30_rate', 0) * 100,
+            'Before_Length': dat.get('after_filtering_read1_mean_length', 0),
             
             # ADAPTER
-            '%Adapter': (adp / b.get('total_reads', 1)) * 100 if b.get('total_reads') else 0,
+            '%Adapter': (adp / b_total * 100) if b_total else 0,
             
             # AFTER TRIM
-            'After_Total_Read(M)': a.get('total_reads', 0) / 1e6,
-            'After_%GC': a.get('gc_content', 0) * 100,
-            'After_Base_Quality(Q30)': a.get('q30_rate', 0) * 100,
-            'After_Length': a.get('read1_mean_length', 0),
+            'After_Total_Read(M)': a_total / 1e6 if a_total else 0,
+            'After_%GC': dat.get('after_filtering_gc_content', 0) * 100,
+            'After_Base_Quality(Q30)': after_q30,
+            'After_Length': dat.get('after_filtering_read1_mean_length', 0),
             
             # ALIGNMENT & POST-TRIM METRICS
             'Map_Read (M)': dat.get('mapped_passed', 0) / 1e6,
             'Map%': dat.get('mapped_passed_pct', 0),
-            '%Duplicate': (dat.get('duplicates_passed', 0) / dat.get('flagstat_total', 1)) * 100 if 'flagstat_total' in dat else 0,
-            'Base_Quality (Phred)': dat.get('phred', 0),
+            '%Duplicate': (dat.get('duplicates_passed', 0) / dat.get('flagstat_total', 1)) * 100 if 'flagstat_total' in dat else dat.get('pct_duplication', 0),
+            
+            # Copied from After Q30
+            'Base_Quality (Phred)': after_q30, 
+            
             'Median_Cov': dat.get('median_coverage', 0),
             'Insert size': dat.get('summed_median', 0),
         }
-        df = pd.concat([df, pd.DataFrame([row])])
+        df_list.append(row)
 
-    # 7. Apply QC Filter
+    df = pd.DataFrame(df_list)
+
+    if df.empty:
+        print("Error: No data successfully matched and extracted. Check JSON keys.")
+        return
+
+    # 5. Apply QC Filter
     def get_qc_status(row):
-        m, c, i, d = row['Map%'], row['Median_Cov'], row.get('Insert size', 0), row['%Duplicate']
+        m = row['Map%']
+        c = row['Median_Cov']
+        i = row.get('Insert size', 0)
+        d = row['%Duplicate']
+        bq = row['Base_Quality (Phred)']
+        
         fails = []
-        if m < 90: fails.append("Low %Map")
-        if c < 10: fails.append("Low Cov")
-        if i < 100: fails.append("Small Ins")
-        if d > 20: fails.append("High Dup")
+        if pd.isna(m) or m < 90: fails.append("Low %Map")
+        if pd.isna(c) or c < 10: fails.append("Low Cov")
+        if pd.isna(i) or i < 100: fails.append("Small Ins")
+        if pd.isna(d) or d > 20: fails.append("High Dup")
+        if pd.isna(bq) or bq <= 90: fails.append("Low Base Qual") # Checks if Base Quality is > 90
+        
         return "PASS" if not fails else f"FAIL ({', '.join(fails)})"
 
     df['Filter QC'] = df.apply(get_qc_status, axis=1)
     
-    # 8. Save to Excel
+    # 6. Save to Excel
     df.to_excel(excel_output, index=False)
     print(f"Generated complete report: {excel_output}")
 
-
 if __name__ == "__main__":
-    # Input setting
+    if len(sys.argv) < 3:
+        print("Usage: python script.py <input.json> <output.xlsx>")
+        sys.exit(1)
+        
     input_file = sys.argv[1]
     output_file = sys.argv[2]
-
-    # Execute the extraction
     extract_qc_with_trim(input_file, output_file)
