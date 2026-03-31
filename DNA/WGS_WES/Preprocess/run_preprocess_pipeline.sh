@@ -158,7 +158,7 @@ run_mosdepth() {
       /common/sif/mosdepth/Mosdepth_0.3.10--h4e814b3_1.sif \
       mosdepth -n --fast-mode -t "${THREADS}" \
       --by 1000 \
-      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.bam
+      /OutputDir/${sample_id} /InputDir/${sample_id}_recal.bam
   elif [[ $SEQ_PLATFORM == "WES" ]]
   then
     # MosDepth For WES or Target
@@ -169,7 +169,7 @@ run_mosdepth() {
       /common/sif/mosdepth/Mosdepth_0.3.10--h4e814b3_1.sif \
       mosdepth -n --fast-mode -t "${THREADS}" \
       --by /Ref/exome_calling_regions.v1.interval_list.bed \
-      /OutputDir/${sample_id}_WGS_depth /InputDir/${sample_id}_recal.bam
+      /OutputDir/${sample_id} /InputDir/${sample_id}_recal.bam
   fi
 }
 
