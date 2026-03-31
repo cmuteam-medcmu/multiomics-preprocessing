@@ -61,12 +61,18 @@ readonly GENOME_BUILD="hg38"
 ├── 02_PREPROCESS/
 │   └── {Sample_ID}/
 │       └── {Sample_ID}_recal.bam          # Input
-└── 03_ICHORCNA/
+└── 04_CNV/
     └── {Sample_ID}/
-        ├── {Sample_ID}.bin                # HMMcopy bin-level read counts
-        ├── {Sample_ID}.cna.seg            # IchorCNA segmentation results
-        ├── {Sample_ID}.seg                # IGV-compatible segment file
-        ├── {Sample_ID}.params.txt         # Estimated tumor fraction and ploidy
-        ├── {Sample_ID}_genomeWide.pdf     # Genome-wide copy number profile plot
-        └── {Sample_ID}_bias.pdf           # GC and mappability bias plots
+        ├── {Sample_ID}.cna.seg
+        ├── {Sample_ID}.correctedDepth.txt
+        ├── {Sample_ID}.params.txt
+        ├── {Sample_ID}.RData
+        ├── {Sample_ID}.seg
+        ├── {Sample_ID}.seg.txt
+        └── {Sample_ID}
+            ├── {Sample_ID}_genomeWide.pdf
+                ..
+                ..
+                ..
+            └── {Sample_ID}_bias.pdf           
 ```
