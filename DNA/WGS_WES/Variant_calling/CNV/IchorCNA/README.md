@@ -54,8 +54,9 @@ readonly SAMPLES_SHEET="${BASE_DIR}/sample_sheet.csv"
 readonly GENOME_BUILD="hg38"
 ```
 
-4. Final output 
-'''text
+4. Final output
+
+```text
 20260204_Batch/ (BASE_DIR)
 ├── 02_PREPROCESS/
 │   └── {Sample_ID}/
@@ -68,4 +69,4 @@ readonly GENOME_BUILD="hg38"
         ├── {Sample_ID}.params.txt         # Estimated tumor fraction and ploidy
         ├── {Sample_ID}_genomeWide.pdf     # Genome-wide copy number profile plot
         └── {Sample_ID}_bias.pdf           # GC and mappability bias plots
-'''
+```
