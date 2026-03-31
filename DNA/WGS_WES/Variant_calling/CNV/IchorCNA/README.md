@@ -1,20 +1,21 @@
 # IchorCNA Analysis Pipeline 
+
 ## Including tools
 -  readCounter
 -  IchorCNA
 
 ## Setting
-1. Create/Ensure folder structure (BASE_DIR)
-   The pipeline expects the output from the Preprocessing Pipeline as follows:
+### 1. Create/Ensure folder structure (BASE_DIR)
+The pipeline expects the output from the Preprocessing Pipeline as follows:
 
-'''
+```text
 20260204_Batch/ (BASE_DIR)
 └── 02_PREPROCESS/
-└── {Sample_ID}/
-└── {Sample_ID}_recal.bam (or .cram)
-'''
+    └── {Sample_ID}/
+        └── {Sample_ID}_recal.bam
+```
 
-2. sample_sheet.csv
+### 2. sample_sheet.csv
     - Use the same CSV file from the Preprocessing step.
 
 | element | format | example |
