@@ -1,9 +1,9 @@
 import json
 import pandas as pd
 import re
-import sys
+import argparse
 
-def extract_qc_with_trim(json_path, excel_output):
+def extract_qc_with_trim(json_path, excel_output, sample_regex=None):
     # 1. Load Data
     with open(json_path, 'r') as f:
         mqc_data = json.load(f)
@@ -13,18 +13,25 @@ def extract_qc_with_trim(json_path, excel_output):
     merged = {}
     generic_metrics = {}
     
-    # 2. Improved ID Extractor
+    # 2. Dynamic ID Extractor
     def get_id(s):
-        match = re.search(r'(\d{8}.*?_Fx\w+M)', s)
-        return match.group(1) if match else s
+        if sample_regex:
+            match = re.search(sample_regex, s)
+            # Use group(1) if capturing group exists, otherwise use the whole match
+            if match:
+                return match.group(1) if match.groups() else match.group(0)
+        return s  # If no regex provided or no match, assume the whole key is the ID
 
     # 3. Combine General Stats
     for entry in gen_stats:
         for s, metrics in entry.items():
             sid = get_id(s)
             
-            # Catch generic keys like "insert_size" or "quality_yield"
-            if sid == s and not re.search(r'Fx\w+M', s):
+            # If a regex is provided, check if the key is a sample or generic
+            is_sample = bool(re.search(sample_regex, s)) if sample_regex else True
+            
+            # Catch generic keys 
+            if sid == s and not is_sample:
                 generic_metrics.update(metrics)
             else:
                 if sid not in merged: 
@@ -38,7 +45,8 @@ def extract_qc_with_trim(json_path, excel_output):
     # 4. Build DataFrame
     df_list = []
     for sid, dat in merged.items():
-        if not re.search(r'Fx\w+M', sid): 
+        # Filter out non-samples if a regex was provided
+        if sample_regex and not re.search(sample_regex, sid): 
             continue 
         
         b_total = dat.get('before_filtering_total_reads', 0)
@@ -82,7 +90,7 @@ def extract_qc_with_trim(json_path, excel_output):
     df = pd.DataFrame(df_list)
 
     if df.empty:
-        print("Error: No data successfully matched and extracted. Check JSON keys.")
+        print("Error: No data successfully matched and extracted. Check JSON keys or your regex pattern.")
         return
 
     # 5. Apply QC Filter
@@ -98,7 +106,7 @@ def extract_qc_with_trim(json_path, excel_output):
         if pd.isna(c) or c < 10: fails.append("Low Cov")
         if pd.isna(i) or i < 100: fails.append("Small Ins")
         if pd.isna(d) or d > 20: fails.append("High Dup")
-        if pd.isna(bq) or bq <= 90: fails.append("Low Base Qual") # Checks if Base Quality is > 90
+        if pd.isna(bq) or bq <= 90: fails.append("Low Base Qual") 
         
         return "PASS" if not fails else f"FAIL ({', '.join(fails)})"
 
@@ -109,10 +117,11 @@ def extract_qc_with_trim(json_path, excel_output):
     print(f"Generated complete report: {excel_output}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
-        print("Usage: python script.py <input.json> <output.xlsx>")
-        sys.exit(1)
-        
-    input_file = sys.argv[1]
-    output_file = sys.argv[2]
-    extract_qc_with_trim(input_file, output_file)
+    parser = argparse.ArgumentParser(description="Extract QC data from MultiQC JSON.")
+    parser.add_argument("-i", "--input", required=True, help="Path to input MultiQC JSON file")
+    parser.add_argument("-o", "--output", required=True, help="Path to output Excel file")
+    parser.add_argument("-p", "--pattern", required=False, help=r"Regex pattern to extract sample names (e.g., '(.*?_Fx\w+M)')")
+    
+    args = parser.parse_args()
+    
+    extract_qc_with_trim(args.input, args.output, args.pattern)
