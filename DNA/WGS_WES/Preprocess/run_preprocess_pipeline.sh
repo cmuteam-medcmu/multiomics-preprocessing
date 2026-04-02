@@ -180,7 +180,9 @@ run_multiqc() {
   echo "LOG: Running MultiQC..."
   multiqc ${OUT_DIR} -o ${OUT_DIR}
 
-  python ${QC_SCRIPT} ${OUT_DIR}/multiqc_data/multiqc_data.json ${OUT_DIR}/QC_SUMMARY.xlsx
+  python ${QC_SCRIPT} -i ${OUT_DIR}/multiqc_data/multiqc_data.json \
+    -o ${OUT_DIR}/QC_SUMMARY.xlsx \
+    -p '^([^_]+(?:_[^_]+){5})'
 }
 
 
