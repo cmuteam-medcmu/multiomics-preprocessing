@@ -72,7 +72,6 @@ check_inputs() {
     [[ -f "${CONTAMINATION_TABLE}" ]] || { echo "ERROR: Contamination table not found: ${CONTAMINATION_TABLE}"; exit 1; }
     [[ -f "${SEGMENTS_TABLE}" ]] || { echo "ERROR: Segments table not found: ${SEGMENTS_TABLE}"; exit 1; }
 
-    mkdir -p logs/mutect2/gatk_filter logs/mutect2/somatic_qc
 }
 
 load_modules() {
