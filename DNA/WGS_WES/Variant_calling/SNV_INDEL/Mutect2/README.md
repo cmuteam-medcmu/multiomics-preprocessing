@@ -35,8 +35,7 @@ The pipeline consists of three main steps:
 
 * Tool: `Mutect2`
 
-  * GPU-accelerated version via Parabricks (recommended)
-  * or standard GATK CPU implementation
+  * GPU-accelerated version via Parabricks
 * Input:
 
   * tumor BAM
@@ -119,7 +118,7 @@ Case3   (independent submission)
 ```bash
 readonly FILTER_MODE="all"
 readonly SERIAL_BY_CASE="yes"
-readonly SLURM_ACCOUNT="o260003"
+readonly SLURM_ACCOUNT="o260003"  #assign your project ID
 ```
 
 ---
@@ -222,10 +221,8 @@ Ensure that:
 
 ```
 output/
-├── LK00019/
-│   ├── gatk_table/
-│   ├── mutect2/
-│   ├── postfilter/
+├── case_id/
+│   ├── recal_tables/
 │   ├── vcf/
 │   │   ├── *.filtered.vcf.gz              # GATK output
 │   │   ├── *.filtered.PASS.vcf.gz         # GATK PASS only
