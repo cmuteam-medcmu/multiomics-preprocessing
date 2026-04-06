@@ -57,7 +57,7 @@ check_inputs() {
     [[ -f "${KNOWN_SITES_SNP}" ]] || { echo "ERROR: Known sites VCF not found: ${KNOWN_SITES_SNP}"; exit 1; }
     [[ -f "${BED}" ]] || { echo "ERROR: BED file not found: ${BED}"; exit 1; }
 
-    mkdir -p "${RECAL_DIR}" logs/mutect2/gatk_table
+    mkdir -p "${RECAL_DIR}"
 }
 
 load_modules() {
