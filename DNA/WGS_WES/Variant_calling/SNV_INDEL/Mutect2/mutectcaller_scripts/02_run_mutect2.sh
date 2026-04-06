@@ -52,7 +52,7 @@ check_inputs() {
     [[ -f "${REF}" ]] || { echo "ERROR: Reference FASTA not found: ${REF}"; exit 1; }
     [[ -f "${BED}" ]] || { echo "ERROR: BED file not found: ${BED}"; exit 1; }
 
-    mkdir -p "${VCF_DIR}" "${TMP_DIR}" logs/mutect2
+    mkdir -p "${VCF_DIR}" "${TMP_DIR}"
 }
 
 load_modules() {
@@ -94,6 +94,12 @@ run_mutect2() {
         exit 1
     fi
 }
+
+cleanup() {
+    echo "Cleaning up temp directory: ${TMP_DIR}"
+    rm -rf "${TMP_DIR}"
+}
+trap cleanup EXIT
 
 main() {
     check_inputs
