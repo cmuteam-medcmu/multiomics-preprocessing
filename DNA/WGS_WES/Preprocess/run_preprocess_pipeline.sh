@@ -10,6 +10,8 @@
 #SBATCH --output=preprocess_%j.out          
 #SBATCH --error=preprocess_%j.err
 
+#V2 by Apiwat
+
 # ==============================================================================
 # Script Name :  run_preprocess_pipeline.sh
 # Description :  Runs FastQC, Fastp, and FQ2BAM on paired-end genomic data.
@@ -18,13 +20,14 @@
 # ==============================================================================
 
 set -euo pipefail
+export CUDA_VISIBLE_DEVICES="0,1"
 
 # 1. VARIABLE SETTING
 readonly THREADS=40
 readonly MEMORY=200 # Gb unit
-readonly OUT_DIR="/project/o250022_cfOSTEO/Cell-line/20260320_Tissue_WES"
-readonly SAMPLES_SHEET="/project/o250022_cfOSTEO/Cell-line/20260320_Tissue_WES/00_RAW_FASTQ/sample_sheet.csv"
-readonly QC_SCRIPT="/project/o250022_cfOSTEO/Cell-line/script/qc_script.py"
+readonly OUT_DIR="./20260407_Tissue_EXO"
+readonly SAMPLES_SHEET="./sample_list_HN00270111.csv"
+readonly QC_SCRIPT="./qc_script_v1.2.py"
 readonly REPORT_DIR="${OUT_DIR}/reports"
 
 # 2. FUNCTIONS
@@ -173,6 +176,43 @@ run_mosdepth() {
   fi
 }
 
+calc_region_depth() {
+  local sample_id=$1
+  local preprocess_dir="${2}/${sample_id}"
+  local regions_file="${preprocess_dir}/${sample_id}.regions.bed.gz"
+  local output_tsv=$3
+
+  echo "LOG: Calculating chr1-22 region depth from regions.bed.gz for ${sample_id}..."
+
+  # Calculate mean and median of per-region depth (col 5) for chr1-22 from regions.bed.gz
+  local stats
+  stats=$(zcat "${regions_file}" \
+    | awk '$1 ~ /^chr[0-9]+$/ {
+        n=substr($1,4)+0
+        if(n>=1 && n<=22) {vals[++k]=$5; sum+=$5}
+      }
+      END {
+        if(k==0){print "NA\tNA"; exit}
+        mean=sum/k
+        # Sort for median
+        for(i=1;i<=k;i++)
+          for(j=i+1;j<=k;j++)
+            if(vals[i]>vals[j]){t=vals[i];vals[i]=vals[j];vals[j]=t}
+        if(k%2==1) median=vals[int(k/2)+1]
+        else median=(vals[k/2]+vals[k/2+1])/2
+        printf "%.4f\t%.4f\n", mean, median
+      }')
+
+  local mean_val=$(echo "${stats}" | cut -f1)
+  local median_val=$(echo "${stats}" | cut -f2)
+
+  # Append to TSV (create header if file doesn't exist)
+  if [[ ! -f "${output_tsv}" ]]; then
+    echo -e "Sample\tMean_Region_Depth_chr1_22\tMedian_Region_Depth_chr1_22" > "${output_tsv}"
+  fi
+  echo -e "${sample_id}\t${mean_val}\t${median_val}" >> "${output_tsv}"
+}
+
 run_multiqc() {
   ml purge
   ml multiqc
@@ -182,7 +222,8 @@ run_multiqc() {
 
   python ${QC_SCRIPT} -i ${OUT_DIR}/multiqc_data/multiqc_data.json \
     -o ${OUT_DIR}/QC_SUMMARY.xlsx \
-    -p '^([^_]+(?:_[^_]+){5})'
+    -p '^([^_]+(?:_[^_]+){5})' \
+    -d ${REPORT_DIR}/mosdepth_region_depth.tsv
 }
 
 
@@ -249,6 +290,9 @@ main() {
 
       # 5. Calculate Coverage
       run_mosdepth "${base_name}" "${CLEAN_DIR}" "${PREPROCESS_DIR}"
+
+      # 6. Calculate chr1-22 region mean/median depth
+      calc_region_depth "${base_name}" "${PREPROCESS_DIR}" "${REPORT_DIR}/mosdepth_region_depth.tsv"
 
     done
 
