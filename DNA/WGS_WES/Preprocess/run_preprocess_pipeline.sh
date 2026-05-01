@@ -108,6 +108,7 @@ run_fq2bam() {
       --out-bam /Workdir/${sample_id}_dedup_sorted.bam \
       --out-qc-metrics-dir /Workdir/${sample_id}-qc-metrics/ \
       --out-recal-file /Workdir/${sample_id}-recal.txt \
+      --num-gpus 1 \
       --tmp-dir /Workdir
 
   # ApplyBQSR
@@ -123,6 +124,7 @@ run_fq2bam() {
       --in-recal-file /InputDir/${sample_id}-recal.txt  \
       --interval /Ref_hg38_v0/${INTERVAL} \
       --out-bam /OutputDir/${sample_id}_recal.bam \
+      --num-gpus 1 \
       --tmp-dir /OutputDir
 
   # Calculate Flagstats
