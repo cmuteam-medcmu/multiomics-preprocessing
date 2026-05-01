@@ -2,6 +2,7 @@ import json
 import pandas as pd
 import re
 import argparse
+import statistics
 
 def extract_qc_with_trim(json_path, excel_output, sample_regex=None):
     with open(json_path, 'r') as f:
@@ -10,6 +11,7 @@ def extract_qc_with_trim(json_path, excel_output, sample_regex=None):
     gen_stats = mqc_data.get('report_general_stats_data', [])
     raw_stats = mqc_data.get('report_saved_raw_data', {}).get('multiqc_general_stats', {})
     fastp_data = mqc_data.get('report_saved_raw_data', {}).get('multiqc_fastp', {})
+    perchrom_data = mqc_data.get('report_saved_raw_data', {}).get('mosdepth_perchrom', {})
 
     def get_id(s):
         if sample_regex:
@@ -47,6 +49,7 @@ def extract_qc_with_trim(json_path, excel_output, sample_regex=None):
                 '%Duplicate': 0,
                 'Base_Quality (Phred)': after_q30,
                 'Median_Cov': 0,
+                'Median_Cov_chr1_22': 0,
                 'Insert size': 0,
             }
 
@@ -63,12 +66,20 @@ def extract_qc_with_trim(json_path, excel_output, sample_regex=None):
             rows[sid]['Map_Read (M)'] = mapped / 1e6
             rows[sid]['Map%'] = (mapped / a_total * 100) if a_total else 0
 
+    autosome_re = re.compile(r'^chr([1-9]|1\d|2[0-2])$')
+
     # Pass 3: fill duplicate rate and coverage
     for s, data in raw_stats.items():
         sid = get_id(s)
         if sid in rows:
             rows[sid]['%Duplicate'] = data.get('fastp-pct_duplication', 0)
             rows[sid]['Median_Cov'] = data.get('mosdepth-median_coverage', 0)
+
+    for s, data in perchrom_data.items():
+        sid = get_id(s)
+        if sid in rows:
+            vals = [v for k, v in data.items() if autosome_re.match(k)]
+            rows[sid]['Median_Cov_chr1_22'] = statistics.median(vals) if vals else 0
 
     # Pass 4: fill insert size and before length from fastp
     for s, data in fastp_data.items():
