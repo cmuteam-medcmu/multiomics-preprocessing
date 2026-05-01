@@ -1,0 +1,2 @@
+# Test Notification
+- try to set watch when GitHub repo has any activities
