@@ -1,0 +1,84 @@
+# Preprocessing Pipeline 
+## Including tools
+-  Fastp
+-  Fastqc
+-  Fq2Bam
+-  MosDepth
+-  MultiQC
+
+## Setting
+1. Create folder structure for each sequencing batch
+```
+20260101_Batch1/ (OUT_DIR)
+└── 00_RAW_FASTQ/
+    ├── Illumina_R1.fq.gz
+    └── Illumina_R2.fq.gz
+```
+   
+2. sample_sheet.csv
+    -  ID must follow AWS structure in each project
+    -  [Standard ABBR.](https://docs.google.com/spreadsheets/d/1sp33RKGkny33fUeUc--WUEOlk2BAREb9xsbEyUN9qng/edit?usp=sharing)
+
+  |element|format|example|
+  |----|----|----|
+  |date|YYYYMMDD|20260101|
+  |library|3 ABBR. with/without coverage|WGS20X|
+  |platform|3 ABBR.|ILL (Illumina)|
+  |case id|5 digits number|OS00001|
+  |sample type|3 ABBR.|CFD (cfDNA)|
+  |sample event|based on each disease|Fx12M (follow-up 12 months)|
+
+```csv
+ID,R1,R2
+20260101_WGS20X_ILL_OS00001_CFD_Fx12M,/20260101_Batch1/00_RAW_FASTQ/Illumina_R1.fq.gz,/20260101_Batch1/00_RAW_FASTQ/Illumina_R2.fq.gz
+```
+
+3. run_preprocess_pipeline.sh
+    -  Change header for slurm management
+    -  Set variables and the paths of sample_sheet.csv & qc_script.py
+  
+```bash
+#SBATCH --account=o250022               
+#SBATCH --job-name=fq2bam  
+#SBATCH --partition=gpu
+#SBATCH --time=10:00:00
+#SBATCH --cpus-per-task=40
+#SBATCH --gpus=1
+#SBATCH --mem=200G
+#SBATCH --output=preprocess_%j.out          
+#SBATCH --error=preprocess_%j.err
+```
+
+```bash
+readonly THREADS=40
+readonly MEMORY=200 # Gb unit
+readonly OUT_DIR="/project/o250022_cfOSTEO/script/preprocess/20260101_Batch1"
+readonly SAMPLES_SHEET="./sample_sheet.csv"
+readonly QC_SCRIPT="./qc_script.py"
+readonly REPORT_DIR="${OUT_DIR}/reports"
+```
+
+4. Final output 
+```
+20260101_Batch1/ (OUT_DIR)
+├── 00_RAW_FASTQ/
+│   ├── Illumina_R1.fq.gz
+│   └── Illumina_R2.fq.gz
+├── 01_CLEAN_QC/
+├── 02_PREPROCESS/
+├── multiqc_data/
+├── reports/
+├── QC_SUMMARY.xlsx
+```
+   
+5. QC template
+    - Copy data from QC_SUMMARY.xlsx
+    - Paste to Google sheet template [QC Summary](https://docs.google.com/spreadsheets/d/1JUirnX6yo0NkUpjTHGlRnbIpUlB-UyOtZFrjM2WKcJs/edit?usp=sharing).
+
+
+```
+#Updated V2
+1.Update ouput file QC_SUMMARY.xlsx, to include mean Mosdepth coverage calculated from bed file.
+2.Build Nexflow pipeline (main_run_preprocess_pipeline_v2.nf and nextflow.config) compatible with new bash script pipeline.
+3.summary_v2.sh is for rerun summary of previous QC run (V1) to make new QC_SUMMARY.xlsx with format compatible with v2
+```
