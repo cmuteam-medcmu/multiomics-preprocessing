@@ -77,8 +77,5 @@ readonly REPORT_DIR="${OUT_DIR}/reports"
 
 
 ```
-#Updated V2
-1.Update ouput file QC_SUMMARY.xlsx, to include mean Mosdepth coverage calculated from bed file.
-2.Build Nexflow pipeline (main_run_preprocess_pipeline_v2.nf and nextflow.config) compatible with new bash script pipeline.
-3.summary_v2.sh is for rerun summary of previous QC run (V1) to make new QC_SUMMARY.xlsx with format compatible with v2
+#Updated V2.4
 ```
